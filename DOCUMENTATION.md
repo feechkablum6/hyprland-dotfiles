@@ -123,23 +123,14 @@ Fallback status bar configuration.
 
 ## Installation
 
-1.  **Copy Configs**:
-    Copy the contents of the `.config` directories to your user's config directory:
+1.  **Run Installation Script**:
+    The repository includes an `install.sh` script to automate the setup. It will create symbolic links for configurations, install scripts to `~/.local/bin/`, and backup existing files.
     ```bash
-    cp -r ags gtk-3.0 gtk-4.0 hypr kitty rofi swaync waybar ~/.config/
+    chmod +x install.sh
+    ./install.sh
     ```
 
-2.  **Copy Scripts**:
-    Copy the `bin` directory to `~/.local/`:
-    ```bash
-    cp -r bin ~/.local/
-    ```
-    Ensure the scripts are executable:
-    ```bash
-    chmod +x ~/.local/bin/*
-    ```
-
-3.  **Dependencies**:
+2.  **Dependencies**:
     Ensure you have the required packages installed:
     - `hyprland`, `hyprpaper`
     - `aylurs-gtk-shell-git` (AGS), `libastal-meta`, `gvfs`
