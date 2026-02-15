@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+rofi_theme="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/media.rasi"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/media"
+art_path="$cache_dir/art.png"
+
+mkdir -p "$cache_dir"
+
+pick_player() {
+  local p
+  while IFS= read -r p; do
+    if playerctl -p "$p" status 2>/dev/null | grep -q "^Playing$"; then
+      printf '%s' "$p"
+      return 0
+    fi
+  done < <(playerctl -l 2>/dev/null || true)
+
+  p=$(playerctl -l 2>/dev/null | head -n 1 || true)
+  if [[ -n "${p:-}" ]]; then
+    printf '%s' "$p"
+    return 0
+  fi
+  return 1
+}
+
+fmt_secs() {
+  local total
+  total=${1%.*}
+  if [[ -z "${total:-}" ]]; then
+    printf '0:00'
+    return
+  fi
+  if (( total < 0 )); then total=0; fi
+  printf '%d:%02d' $((total / 60)) $((total % 60))
+}
+
+urldecode() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$1" <<'PY'
+import sys, urllib.parse
+print(urllib.parse.unquote(sys.argv[1]))
+PY
+  else
+    printf '%s' "$1"
+  fi
+}
+
+resolve_art() {
+  local url path
+  url="${1:-}"
+  [[ -z "$url" ]] && return 1
+
+  if [[ "$url" == file://* ]]; then
+    path=$(urldecode "${url#file://}")
+    if [[ -r "$path" ]]; then
+      printf '%s' "$path"
+      return 0
+    fi
+  fi
+
+  if [[ "$url" == http://* || "$url" == https://* ]]; then
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL "$url" -o "$art_path" >/dev/null 2>&1 || return 1
+      printf '%s' "$art_path"
+      return 0
+    fi
+    if command -v wget >/dev/null 2>&1; then
+      wget -qO "$art_path" "$url" >/dev/null 2>&1 || return 1
+      printf '%s' "$art_path"
+      return 0
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+      python3 - "$url" "$art_path" <<'PY'
+import sys, urllib.request
+urllib.request.urlretrieve(sys.argv[1], sys.argv[2])
+PY
+      printf '%s' "$art_path"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+player=$(pick_player || true)
+if [[ -z "${player:-}" ]]; then
+  rofi -e "No media players found" || true
+  exit 0
+fi
+
+status=$(playerctl -p "$player" status 2>/dev/null || printf 'Stopped')
+title=$(playerctl -p "$player" metadata title 2>/dev/null || true)
+artist=$(playerctl -p "$player" metadata artist 2>/dev/null || true)
+album=$(playerctl -p "$player" metadata album 2>/dev/null || true)
+pos=$(playerctl -p "$player" position 2>/dev/null || printf '0')
+len_us=$(playerctl -p "$player" metadata mpris:length 2>/dev/null || true)
+vol=$(playerctl -p "$player" volume 2>/dev/null || true)
+art_url=$(playerctl -p "$player" metadata mpris:artUrl 2>/dev/null || true)
+
+len=""
+if [[ -n "${len_us:-}" ]] && [[ "$len_us" =~ ^[0-9]+$ ]]; then
+  len=$(fmt_secs "$((len_us / 1000000))")
+fi
+
+msg="${artist:-}${artist:+ - }${title:-}\n${album:-}\n${status}  $(fmt_secs "$pos")${len:+ / $len}"
+if [[ -n "${vol:-}" ]]; then
+  msg+="\nvol $(printf '%.0f' "$(awk -v v="$vol" 'BEGIN{print v*100}' 2>/dev/null || echo 0)")%"
+fi
+
+icon=""
+if icon=$(resolve_art "$art_url" 2>/dev/null); then
+  :
+else
+  icon=""
+fi
+
+add_item() {
+  local label="$1"
+  if [[ -n "$icon" ]]; then
+    printf '%s\0icon\x1f%s\n' "$label" "$icon"
+  else
+    printf '%s\n' "$label"
+  fi
+}
+
+menu=$( {
+  add_item "󰐊  Play / Pause"
+  add_item "󰒭  Previous"
+  add_item "󰒮  Next"
+  add_item "󰥺  Seek -10s"
+  add_item "󰥹  Seek +10s"
+  add_item "󰝚  Seek -60s"
+  add_item "󰝛  Seek +60s"
+  add_item "󰕾  Volume +5%"
+  add_item "󰕿  Volume -5%"
+  add_item "󰖁  Mute (player)"
+} | rofi -dmenu -i -p "media" -mesg "$msg" -theme "$rofi_theme" -show-icons )
+
+case "$menu" in
+  "󰐊  Play / Pause") playerctl -p "$player" play-pause ;;
+  "󰒭  Previous") playerctl -p "$player" previous ;;
+  "󰒮  Next") playerctl -p "$player" next ;;
+  "󰥺  Seek -10s") playerctl -p "$player" position 10- ;;
+  "󰥹  Seek +10s") playerctl -p "$player" position 10+ ;;
+  "󰝚  Seek -60s") playerctl -p "$player" position 60- ;;
+  "󰝛  Seek +60s") playerctl -p "$player" position 60+ ;;
+  "󰕾  Volume +5%") playerctl -p "$player" volume 0.05+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+ ;;
+  "󰕿  Volume -5%") playerctl -p "$player" volume 0.05- || wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%- ;;
+  "󰖁  Mute (player)") playerctl -p "$player" volume 0 || wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+  *) exit 0 ;;
+esac

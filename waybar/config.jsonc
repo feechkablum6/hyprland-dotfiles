@@ -1,0 +1,126 @@
+// -*- mode: jsonc -*-
+{
+  "layer": "top",
+  "position": "top",
+  "height": 30,
+  "margin-top": 10,
+  "margin-left": 12,
+  "margin-right": 12,
+  "spacing": 8,
+
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces",
+    "mpris"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "network",
+    "pulseaudio",
+    "battery",
+    "tray",
+    "custom/notifications",
+    "custom/power"
+  ],
+
+  "custom/launcher": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "rofi -show drun -show-icons"
+  },
+
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "active": "●",
+      "visible": "●",
+      "default": "○",
+      "special": "◇"
+    },
+    "persistent-workspaces": {
+      "*": [1, 2, 3, 4, 5]
+    }
+  },
+
+  "mpris": {
+    "format": "{player_icon} {artist} - {title}",
+    "format-paused": "󰏤 {artist} - {title}",
+    "max-length": 40,
+    "on-click": "/home/akashi/.local/bin/media-menu",
+    "on-click-middle": "playerctl play-pause",
+    "on-click-right": "playerctl next",
+    "on-scroll-up": "playerctl position 10+",
+    "on-scroll-down": "playerctl position 10-",
+    "player-icons": {
+      "default": "󰎆",
+      "spotify": "󰓇",
+      "firefox": "󰈹",
+      "chromium": "󰊯"
+    },
+    "tooltip-format": "{player}: {artist} - {title}"
+  },
+
+  "clock": {
+    "format": "{:%H:%M  %a %d %b}",
+    "tooltip-format": "{:%Y-%m-%d}\\n{calendar}"
+  },
+
+  "network": {
+    "format-wifi": "󰤨 {signalStrength}%",
+    "format-ethernet": "󰈁 {ipaddr}",
+    "format-disconnected": "󰤭",
+    "tooltip": true,
+    "tooltip-format-wifi": "{essid}\\n{ipaddr}\\n{signalStrength}%"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰖁",
+    "format-icons": {
+      "default": ["󰕿", "󰖀", "󰕾"]
+    },
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+",
+    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-",
+    "tooltip": false
+  },
+
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰂄 {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+  },
+
+  "tray": {
+    "icon-size": 16,
+    "spacing": 8
+  },
+
+  "custom/notifications": {
+    "exec": "swaync-client -swb",
+    "return-type": "json",
+    "format": "{icon} {text}",
+    "format-icons": {
+      "notification": "󰂚",
+      "none": "󰂜",
+      "dnd-notification": "󰂛",
+      "dnd-none": "󰪓"
+    },
+    "on-click": "swaync-client -t",
+    "on-click-right": "swaync-client -d",
+    "tooltip": true
+  },
+
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip": "Power",
+    "on-click": "/home/akashi/.local/bin/powermenu"
+  }
+}

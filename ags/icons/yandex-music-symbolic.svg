@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path fill="#EBEEFF" fill-opacity="0.92" d="M12 2.5A9.5 9.5 0 1 0 21.5 12 9.51 9.51 0 0 0 12 2.5Zm0 17.4A7.9 7.9 0 1 1 19.9 12 7.91 7.91 0 0 1 12 19.9Z"/>
+  <path fill="#EBEEFF" fill-opacity="0.92" d="M12.2 6.4c-.8 0-1.4.6-1.4 1.4v4.1l-1.6 1.6a1.1 1.1 0 0 0 0 1.6c.4.4 1.1.4 1.6 0l2-2c.2-.2.3-.5.3-.8V7.8c0-.8-.6-1.4-1.4-1.4Z"/>
+  <circle cx="14.9" cy="9.0" r="1.1" fill="#00C4AA" fill-opacity="0.90"/>
+</svg>

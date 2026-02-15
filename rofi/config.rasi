@@ -1,0 +1,9 @@
+configuration {
+  modi: "drun,run,window";
+  show-icons: true;
+  drun-display-format: "{name}";
+  font: "JetBrainsMono Nerd Font 12";
+  icon-theme: "Adwaita";
+}
+
+@theme "theme"

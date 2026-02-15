@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+edit=0
+if [[ "${1:-}" == "--edit" ]]; then
+  edit=1
+fi
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || {
+    printf 'screenshot-area: missing dependency: %s\n' "$1" >&2
+    exit 127
+  }
+}
+
+need_cmd grim
+need_cmd slurp
+need_cmd wl-copy
+
+if [[ "$edit" -eq 1 ]]; then
+  need_cmd swappy
+fi
+
+region="$(slurp)" || exit 0
+if [[ -z "$region" ]]; then
+  exit 0
+fi
+
+out_dir="${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots"
+mkdir -p "$out_dir"
+
+ts="$(date +'%Y-%m-%d_%H-%M-%S')"
+out_file="$out_dir/screenshot_${ts}.png"
+
+grim -g "$region" "$out_file"
+wl-copy --type image/png < "$out_file"
+
+if [[ "$edit" -eq 1 ]]; then
+  # Overwrite the file with the edited result.
+  swappy -f "$out_file" -o "$out_file"
+  wl-copy --type image/png < "$out_file"
+fi

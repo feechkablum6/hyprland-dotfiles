@@ -1,0 +1,80 @@
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  min-height: 0;
+}
+
+window#waybar {
+  background: rgba(14, 16, 22, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: rgba(235, 238, 255, 0.92);
+}
+
+#custom-launcher,
+#workspaces,
+#mpris,
+#clock,
+#network,
+#pulseaudio,
+#battery,
+#tray,
+#custom-notifications,
+#custom-power {
+  background: rgba(20, 22, 30, 0.40);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 3px 10px;
+  margin: 6px 4px;
+}
+
+#custom-launcher {
+  padding: 3px 12px;
+  font-size: 14px;
+  color: #c7ccff;
+}
+
+#custom-launcher:hover,
+#custom-notifications:hover,
+#custom-power:hover {
+  background: rgba(34, 36, 46, 0.55);
+}
+
+#workspaces {
+  padding: 0 8px;
+}
+
+#workspaces button {
+  padding: 0 3px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: rgba(235, 238, 255, 0.45);
+}
+
+#workspaces button.active {
+  color: #c7ccff;
+}
+
+#workspaces button.visible {
+  color: rgba(235, 238, 255, 0.75);
+}
+
+#workspaces button.urgent {
+  color: #ffb4b4;
+}
+
+#tray {
+  padding: 3px 8px;
+}
+
+#custom-power {
+  padding: 3px 12px;
+  color: rgba(235, 238, 255, 0.80);
+}
+
+tooltip {
+  background: rgba(14, 16, 22, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+}

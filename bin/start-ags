@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# NOTE:
+# - This script intentionally does NOT auto-start waybar when AGS is installed.
+# - Waybar is only used as a fallback when AGS is missing (or the wrong 'ags' is installed).
+
+logdir="${XDG_CACHE_HOME:-$HOME/.cache}/ags"
+mkdir -p "$logdir"
+log="$logdir/start-ags.log"
+runlog="$logdir/ags-run.log"
+
+# Log everything for autostart debugging, but still show output when run from a terminal.
+if [[ -t 1 ]]; then
+  exec > >(tee -a "$log") 2>&1
+else
+  exec >>"$log" 2>&1
+fi
+echo "---"
+echo "start-ags: $(date -Is)"
+
+if ! command -v ags >/dev/null 2>&1; then
+  echo "Aylur's GTK Shell (ags) is not installed." >&2
+  echo "Install it from AUR: yay -S aylurs-gtk-shell-git libastal-meta gvfs" >&2
+  echo "Falling back to waybar." >&2
+  nohup waybar >/dev/null 2>&1 &
+  exit 0
+fi
+
+# There is a name collision on Arch: package 'ags' is Adventure Game Studio.
+# We only want Aylur's GTK Shell.
+if ags --version 2>&1 | grep -qi "Adventure Game Studio"; then
+  echo "Found /usr/bin/ags = Adventure Game Studio (wrong one)." >&2
+  echo "Remove it and install Aylur's GTK Shell:" >&2
+  echo "  sudo pacman -Rns ags" >&2
+  echo "  yay -S --needed aylurs-gtk-shell-git libastal-meta gvfs" >&2
+  echo "Falling back to waybar." >&2
+  nohup waybar >/dev/null 2>&1 &
+  exit 0
+fi
+
+if ! ags run --help >/dev/null 2>&1; then
+  echo "ags exists, but it does not support 'ags run' (not Aylur's GTK Shell)." >&2
+  echo "Install: yay -S --needed aylurs-gtk-shell-git libastal-meta gvfs" >&2
+  echo "Falling back to waybar." >&2
+  nohup waybar >/dev/null 2>&1 &
+  exit 0
+fi
+
+cfg="${XDG_CONFIG_HOME:-$HOME/.config}/ags/shell.tsx"
+if [[ ! -f "$cfg" ]]; then
+  echo "Missing AGS config: $cfg" >&2
+  exit 1
+fi
+
+pkill waybar 2>/dev/null || true
+
+# Clean up any stuck CLI calls from previous runs.
+# Some ags builds can get stuck in a D-Bus wait and ignore TERM.
+pkill -9 -f "ags quit" 2>/dev/null || true
+
+# Try to stop a previous AGS instance (ignore errors).
+# NOTE: ags quit can hang if there is no active instance, so only do it when
+# there is something that looks like an AGS run.
+if pgrep -f "ags run" >/dev/null 2>&1; then
+  timeout -k 0.2 1 ags quit >/dev/null 2>&1 || true
+  pkill -9 -f "ags quit" 2>/dev/null || true
+fi
+
+# Clean up old runs.
+pkill -f "ags run .*${cfg//\//\\/}" 2>/dev/null || true
+
+nohup ags run --gtk 4 "$cfg" >>"$runlog" 2>&1 &

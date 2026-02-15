@@ -1,0 +1,88 @@
+:root {
+  --cc-bg: rgba(16, 18, 26, 0.86);
+  --noti-border-color: rgba(255, 255, 255, 0.10);
+  --noti-bg: 20, 22, 30;
+  --noti-bg-alpha: 0.78;
+  --noti-bg-darker: rgba(12, 14, 20, 0.95);
+  --noti-bg-hover: rgba(34, 36, 46, 0.70);
+  --noti-bg-focus: rgba(34, 36, 46, 0.70);
+  --noti-close-bg: rgba(255, 255, 255, 0.10);
+  --noti-close-bg-hover: rgba(255, 255, 255, 0.16);
+  --text-color: rgba(235, 238, 255, 0.92);
+  --text-color-disabled: rgba(235, 238, 255, 0.45);
+  --bg-selected: rgba(199, 204, 255, 0.25);
+  --border: 1px solid var(--noti-border-color);
+  --border-radius: 16px;
+  --font-size-body: 14px;
+  --font-size-summary: 14px;
+}
+
+notificationwindow, blankwindow {
+  background: transparent;
+}
+
+.control-center {
+  background: var(--cc-bg);
+  border: var(--border);
+  border-radius: 18px;
+  padding: 10px;
+}
+
+.widget-title,
+.widget-dnd,
+.widget-mpris,
+.widget-buttons-grid,
+.widget-inhibitors {
+  background: rgba(20, 22, 30, 0.50);
+  border: var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.widget-title label,
+.widget-dnd label,
+.widget-inhibitors label {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.widget-buttons-grid button {
+  background: rgba(20, 22, 30, 0.55);
+  border: var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  color: var(--text-color);
+}
+
+.widget-buttons-grid button:hover {
+  background: var(--noti-bg-hover);
+}
+
+.widget-buttons-grid button.toggle:checked {
+  background: rgba(199, 204, 255, 0.18);
+  border: 1px solid rgba(199, 204, 255, 0.28);
+}
+
+.notification-row .notification-background .notification {
+  border-radius: 16px;
+  border: var(--border);
+  background: rgba(var(--noti-bg), var(--noti-bg-alpha));
+}
+
+.notification-row .notification-background .notification .notification-default-action:hover {
+  background: var(--noti-bg-hover);
+}
+
+.close-button {
+  background: var(--noti-close-bg);
+  color: var(--text-color);
+  border-radius: 999px;
+  border: none;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.close-button:hover {
+  background: var(--noti-close-bg-hover);
+}

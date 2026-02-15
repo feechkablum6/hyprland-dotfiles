@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v wlogout >/dev/null 2>&1; then
+  exec wlogout -b 5 -T 400 -B 400
+fi
+
+choice=$(
+  printf '%s\n' \
+    "suspend" \
+    "reboot" \
+    "shutdown" \
+    "logout" \
+    | rofi -dmenu -i -p "power"
+)
+
+case "$choice" in
+  suspend) systemctl suspend ;;
+  reboot) systemctl reboot ;;
+  shutdown) systemctl poweroff ;;
+  logout) hyprctl dispatch exit ;;
+  *) exit 0 ;;
+esac

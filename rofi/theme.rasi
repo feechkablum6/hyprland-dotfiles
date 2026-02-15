@@ -1,0 +1,56 @@
+* {
+  text-color: rgba(235, 238, 255, 0.92);
+  bg: #10121a;
+  bg2: #14161e;
+  border: rgba(255, 255, 255, 0.10);
+  accent: #c7ccff;
+}
+
+window {
+  width: 680px;
+  border: 1px;
+  border-color: @border;
+  border-radius: 18px;
+  background-color: @bg;
+}
+
+mainbox {
+  padding: 16px;
+  spacing: 12px;
+}
+
+inputbar {
+  border-radius: 14px;
+  background-color: @bg2;
+  padding: 10px 12px;
+  spacing: 10px;
+}
+
+prompt {
+  text-color: @accent;
+}
+
+listview {
+  background-color: transparent;
+  spacing: 8px;
+  lines: 8;
+}
+
+element {
+  border-radius: 14px;
+  padding: 10px 12px;
+  background-color: transparent;
+}
+
+element selected {
+  background-color: rgba(199, 204, 255, 0.16);
+}
+
+element-icon {
+  size: 22px;
+  margin: 0 10px 0 0;
+}
+
+element-text {
+  background-color: transparent;
+}

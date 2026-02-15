@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Downloads and caches service logos (favicons) for AGS.
+# This is manual on purpose: no background network usage.
+
+dir="${XDG_CONFIG_HOME:-$HOME/.config}/ags/icons/services"
+mkdir -p "$dir"
+
+fetch() {
+  local domain="$1"
+  local out="$2"
+  local url="https://www.google.com/s2/favicons?domain=${domain}&sz=64"
+  curl -fsSL --max-time 4 "$url" -o "$out"
+}
+
+fetch youtube.com "$dir/youtube.png"
+fetch music.yandex.ru "$dir/yandex-music.png"
+
+echo "Updated:"
+ls -la "$dir" | sed -n '1,200p'
