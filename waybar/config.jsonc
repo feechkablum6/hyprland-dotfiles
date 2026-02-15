@@ -48,7 +48,7 @@
     "format": "{player_icon} {artist} - {title}",
     "format-paused": "󰏤 {artist} - {title}",
     "max-length": 40,
-    "on-click": "/home/akashi/.local/bin/media-menu",
+    "on-click": "~/.local/bin/media-menu",
     "on-click-middle": "playerctl play-pause",
     "on-click-right": "playerctl next",
     "on-scroll-up": "playerctl position 10+",
@@ -121,6 +121,6 @@
   "custom/power": {
     "format": "󰐥",
     "tooltip": "Power",
-    "on-click": "/home/akashi/.local/bin/powermenu"
+    "on-click": "~/.local/bin/powermenu"
   }
 }

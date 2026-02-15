@@ -77,13 +77,25 @@ fi
 
 echo -e "${GREEN}Installation complete!${NC}"
 echo ""
-echo -e "${YELLOW}To apply changes:${NC}"
-echo "1. Reload Hyprland configuration:"
-echo "   $ hyprctl reload"
-echo ""
-echo "2. Restart AGS/Waybar:"
-echo "   The reload command might handle this, but if not:"
-echo "   $ killall ags waybar"
-echo "   $ start-ags &"
-echo ""
-echo "3. For full effect (environment variables, etc.), log out and log back in."
+
+read -p "Do you want to restart the UI now? (y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${BLUE}Reloading Hyprland...${NC}"
+    hyprctl reload
+    echo -e "${BLUE}Restarting AGS...${NC}"
+    # Using the simpler variant as requested
+    pkill -f "ags run" || true
+    "$HOME/.local/bin/start-ags" &
+    echo -e "${GREEN}Done!${NC}"
+else
+    echo -e "${YELLOW}To apply changes manually:${NC}"
+    echo "1. Reload Hyprland configuration:"
+    echo "   hyprctl reload"
+    echo ""
+    echo "2. Restart AGS:"
+    echo "   pkill -f \"ags run\" && ~/.local/bin/start-ags &"
+    echo "   (If the bar doesn't appear, check ~/.cache/ags/ags-run.log)"
+    echo ""
+    echo "3. For full effect (environment variables, etc.), log out and log back in."
+fi
