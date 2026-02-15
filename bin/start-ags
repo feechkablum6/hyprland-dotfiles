@@ -47,7 +47,7 @@ if ! ags run --help >/dev/null 2>&1; then
   exit 0
 fi
 
-cfg="${XDG_CONFIG_HOME:-$HOME/.config}/ags/shell.tsx"
+cfg="${XDG_CONFIG_HOME:-$HOME/.config}/ags/app.ts"
 if [[ ! -f "$cfg" ]]; then
   echo "Missing AGS config: $cfg" >&2
   exit 1

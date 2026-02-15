@@ -85,8 +85,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     hyprctl reload
     echo -e "${BLUE}Restarting AGS...${NC}"
     # Using the simpler variant as requested
-    pkill -f "ags run" || true
-    "$HOME/.local/bin/start-ags" &
+    killall -9 ags gjs 2>/dev/null || true; ~/.local/bin/start-ags &
     echo -e "${GREEN}Done!${NC}"
 else
     echo -e "${YELLOW}To apply changes manually:${NC}"
@@ -94,7 +93,7 @@ else
     echo "   hyprctl reload"
     echo ""
     echo "2. Restart AGS:"
-    echo "   pkill -f \"ags run\" && ~/.local/bin/start-ags &"
+    echo "   killall -9 ags gjs 2>/dev/null; ~/.local/bin/start-ags &"
     echo "   (If the bar doesn't appear, check ~/.cache/ags/ags-run.log)"
     echo ""
     echo "3. For full effect (environment variables, etc.), log out and log back in."
