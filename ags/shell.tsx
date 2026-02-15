@@ -1,4 +1,5 @@
 import css from "./style.css"
+import wifiCss from "./wifi.css"
 
 import app from "ags/gtk4/app"
 import { Astal } from "ags/gtk4"
@@ -1463,7 +1464,7 @@ function Bar(monitor = 0) {
 }
 
 app.start({
-  css,
+  css: css + "\n" + wifiCss,
   main() {
     Bar(0)
     MediaPopup(0)
