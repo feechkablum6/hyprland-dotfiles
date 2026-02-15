@@ -108,7 +108,7 @@ button.pill.media:hover {
 
 .media-popup {
   min-width: 580px;
-  background-color: rgba(18, 22, 28, 0.65);
+  background-color: rgba(18, 22, 28, 0.90);
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
   color: rgba(235, 238, 255, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.15);
