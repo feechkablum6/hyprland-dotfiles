@@ -850,95 +850,123 @@ function MediaPopup(monitor = 0) {
               m.has && (
                 <box orientation={Gtk.Orientation.VERTICAL} spacing={10} valign={Gtk.Align.CENTER} vexpand>
 
-                  {/* Title and Artist */}
-                  <box orientation={Gtk.Orientation.VERTICAL} spacing={4} halign={Gtk.Align.CENTER}>
-                    <label
-                      class="media-title"
-                      label={m.title}
-                      ellipsize={Pango.EllipsizeMode.END}
-                      maxWidthChars={30}
-                    />
-                    <label
-                      class="media-artist"
-                      label={m.artist}
-                      ellipsize={Pango.EllipsizeMode.END}
-                      maxWidthChars={30}
-                    />
-                  </box>
-
-                  <box class="media-controls" spacing={20} halign={Gtk.Align.CENTER}>
-                    <button
-                      class="media-circ-btn"
-                      sensitive={mediaSnap((mm) => !!mm.canPrev)}
-                      onClicked={() => mediaP?.previous?.()}
-                    >
-                      <image iconName="media-skip-backward-symbolic" pixelSize={20} />
-                    </button>
-                    <button
-                      class={mediaSnap((mm) => (mm.status === "Playing" ? "media-circ-btn-play is-playing" : "media-circ-btn-play"))}
-                      sensitive={mediaSnap((mm) => !!mm.canControl)}
-                      onClicked={() => mediaPlayPause()}
-                    >
-                      <image
-                        iconName={mediaSnap((mm) =>
-                          mm.status === "Playing" ? "media-playback-pause-symbolic" : "media-playback-start-symbolic",
-                        )}
-                        pixelSize={28}
-                      />
-                    </button>
-                    <button
-                      class="media-circ-btn"
-                      sensitive={mediaSnap((mm) => !!mm.canNext)}
-                      onClicked={() => mediaP?.next?.()}
-                    >
-                      <image iconName="media-skip-forward-symbolic" pixelSize={20} />
-                    </button>
-                  </box>
-
-                  {/* Duration */}
-                  <box orientation={Gtk.Orientation.VERTICAL} spacing={6}>
-                    <box spacing={10}>
-                      <label class="media-sub-label" label="DURATION" hexpand xalign={0} />
-                      <image iconName="audio-input-microphone-symbolic" pixelSize={12} class="media-wave" />
-                      <label class="media-sub-label" label={mediaTime((t) => `${fmtTime(t.pos)} / ${fmtTime(t.len)}`)} xalign={1} />
+                  {m.status === "Stopped" ? (
+                    <box orientation={Gtk.Orientation.VERTICAL} spacing={20} halign={Gtk.Align.CENTER}>
+                      <label class="media-title" label="Ничего не играет" />
+                      <box class="media-controls" spacing={20} halign={Gtk.Align.CENTER}>
+                        <button
+                          class="media-circ-btn"
+                          onClicked={() => execAsync(["google-chrome-beta", "https://twitch.tv"]).catch(console.error)}
+                        >
+                          <image file={iconPath("services/twitch.png")} pixelSize={24} />
+                        </button>
+                        <button
+                          class="media-circ-btn"
+                          onClicked={() => execAsync(["google-chrome-beta", "https://youtube.com"]).catch(console.error)}
+                        >
+                          <image file={iconPath("services/youtube.png")} pixelSize={24} />
+                        </button>
+                        <button
+                          class="media-circ-btn"
+                          onClicked={() => execAsync(["google-chrome-beta", "https://music.yandex.ru/playlists/lk.f6addeb0-d363-4a3e-ae0a-9d1244b40481"]).catch(console.error)}
+                        >
+                          <image file={iconPath("services/yandex-music.png")} pixelSize={24} />
+                        </button>
+                      </box>
                     </box>
-                    <slider
-                      class="media-slider"
-                      hexpand
-                      min={0}
-                      max={mediaTime((t) => t.len)}
-                      value={mediaTime((t) => t.pos)}
-                      sensitive={mediaSnap((mm) => !!mm.canSeek)}
-                      onChangeValue={({ value }) => {
-                        const pp = mediaP
-                        if (!pp) return
-                        const newPos = Number(value)
-                        setMediaTime({ ...mediaTime(), pos: newPos })
-                        mediaSetPosition(pp, newPos)
-                      }}
-                    />
-                  </box>
+                  ) : (
+                    <box orientation={Gtk.Orientation.VERTICAL} spacing={10} valign={Gtk.Align.CENTER} vexpand>
+                      {/* Title and Artist */}
+                      <box orientation={Gtk.Orientation.VERTICAL} spacing={4} halign={Gtk.Align.CENTER}>
+                        <label
+                          class="media-title"
+                          label={m.title}
+                          ellipsize={Pango.EllipsizeMode.END}
+                          maxWidthChars={30}
+                        />
+                        <label
+                          class="media-artist"
+                          label={m.artist}
+                          ellipsize={Pango.EllipsizeMode.END}
+                          maxWidthChars={30}
+                        />
+                      </box>
 
-                  {/* Volume */}
-                  <box orientation={Gtk.Orientation.VERTICAL} spacing={6}>
-                    <box spacing={10}>
-                      <label class="media-sub-label" label="VOLUME" hexpand xalign={0} />
-                      <label class="media-sub-label" label={mediaSnap((mm) => `${Math.round((Number.isFinite(mm.volume) ? mm.volume : 0.5) * 100)}%`)} xalign={1} />
+                      <box class="media-controls" spacing={20} halign={Gtk.Align.CENTER}>
+                        <button
+                          class="media-circ-btn"
+                          sensitive={mediaSnap((mm) => !!mm.canPrev)}
+                          onClicked={() => mediaP?.previous?.()}
+                        >
+                          <image iconName="media-skip-backward-symbolic" pixelSize={20} />
+                        </button>
+                        <button
+                          class={mediaSnap((mm) => (mm.status === "Playing" ? "media-circ-btn-play is-playing" : "media-circ-btn-play"))}
+                          sensitive={mediaSnap((mm) => !!mm.canControl)}
+                          onClicked={() => mediaPlayPause()}
+                        >
+                          <image
+                            iconName={mediaSnap((mm) =>
+                              mm.status === "Playing" ? "media-playback-pause-symbolic" : "media-playback-start-symbolic",
+                            )}
+                            pixelSize={28}
+                          />
+                        </button>
+                        <button
+                          class="media-circ-btn"
+                          sensitive={mediaSnap((mm) => !!mm.canNext)}
+                          onClicked={() => mediaP?.next?.()}
+                        >
+                          <image iconName="media-skip-forward-symbolic" pixelSize={20} />
+                        </button>
+                      </box>
+
+                      {/* Duration */}
+                      <box orientation={Gtk.Orientation.VERTICAL} spacing={6}>
+                        <box spacing={10}>
+                          <label class="media-sub-label" label="DURATION" hexpand xalign={0} />
+                          <image iconName="audio-input-microphone-symbolic" pixelSize={12} class="media-wave" />
+                          <label class="media-sub-label" label={mediaTime((t) => `${fmtTime(t.pos)} / ${fmtTime(t.len)}`)} xalign={1} />
+                        </box>
+                        <slider
+                          class="media-slider"
+                          hexpand
+                          min={0}
+                          max={mediaTime((t) => t.len)}
+                          value={mediaTime((t) => t.pos)}
+                          sensitive={mediaSnap((mm) => !!mm.canSeek)}
+                          onChangeValue={({ value }) => {
+                            const pp = mediaP
+                            if (!pp) return
+                            const newPos = Number(value)
+                            setMediaTime({ ...mediaTime(), pos: newPos })
+                            mediaSetPosition(pp, newPos)
+                          }}
+                        />
+                      </box>
+
+                      {/* Volume */}
+                      <box orientation={Gtk.Orientation.VERTICAL} spacing={6}>
+                        <box spacing={10}>
+                          <label class="media-sub-label" label="VOLUME" hexpand xalign={0} />
+                          <label class="media-sub-label" label={mediaSnap((mm) => `${Math.round((Number.isFinite(mm.volume) ? mm.volume : 0.5) * 100)}%`)} xalign={1} />
+                        </box>
+                        <box spacing={10}>
+                          <image class="media-vol-icon" iconName="audio-volume-high-symbolic" pixelSize={16} />
+                          <slider
+                            class="media-vol"
+                            hexpand
+                            min={0}
+                            max={1}
+                            value={mediaSnap((mm) => (Number.isFinite(mm.volume) ? mm.volume : 0.5))}
+                            onChangeValue={({ value }) => {
+                              queueSetVolume(Number(value))
+                            }}
+                          />
+                        </box>
+                      </box>
                     </box>
-                    <box spacing={10}>
-                      <image class="media-vol-icon" iconName="audio-volume-high-symbolic" pixelSize={16} />
-                      <slider
-                        class="media-vol"
-                        hexpand
-                        min={0}
-                        max={1}
-                        value={mediaSnap((mm) => (Number.isFinite(mm.volume) ? mm.volume : 0.5))}
-                        onChangeValue={({ value }) => {
-                          queueSetVolume(Number(value))
-                        }}
-                      />
-                    </box>
-                  </box>
+                  )}
                 </box>
               )
             }
