@@ -24,7 +24,7 @@ const sh = (cmd: string) =>
 const playerctl = (args: string[]) =>
   execAsync(["playerctl", ...args]).catch(() => "")
 
-const wpctl = (cmd: string) => sh(`wpctl ${cmd} 2>/dev/null`)
+const wpctl = (cmd: string) => sh(`LC_ALL=C wpctl ${cmd} 2>/dev/null`)
 
 const fmtTime = (sec: number) => {
   const s = Math.max(0, Math.floor(sec || 0))
@@ -400,7 +400,8 @@ const syncMedia = () => {
 
   const prev = mediaSnap()
   const pv = Number((p as any)?.volume)
-  const vol = Number.isFinite(pv) && pv >= 0 ? clamp01(pv, prev.volume) : prev.volume
+  const recentlySet = Date.now() - lastVolumeSetAt < 2000
+  const vol = (Number.isFinite(pv) && pv >= 0 && !recentlySet) ? clamp01(pv, prev.volume) : prev.volume
 
   if (status === "Stopped") {
     setMediaSnap({
@@ -504,7 +505,8 @@ const resolveWpctlStreamId = async () => {
       // Skip port lines containing ">".
       if (line.includes(">")) continue
 
-      const m = line.match(/^\s*(\d+)\.\s+(.+?)\s*$/)
+      // Match ID and Name. Relaxed regex to handle "123. Name [vol: 1.00]"
+      const m = line.match(/^\s*(\d+)\.\s+(.*)$/)
       if (!m) continue
       const id = Number(m[1])
       const name = String(m[2] || "").trim()
@@ -534,18 +536,22 @@ const resolveWpctlStreamId = async () => {
 }
 
 let volTimer: any = null
+let lastVolumeSetAt = 0
+
 const queueSetVolume = (value: number) => {
   const v = Math.max(0, Math.min(1, Number(value) || 0))
   // Update UI immediately.
   setMediaSnap({ ...mediaSnap(), volume: v })
+  lastVolumeSetAt = Date.now()
 
   if (volTimer) volTimer.cancel?.()
   volTimer = timeout(90, () => {
     const p = mediaP
+    let mprisSet = false
     if (p && Number((p as any)?.volume) >= 0) {
       try {
         ;(p as any).volume = v
-        return
+        mprisSet = true
       } catch {
         // fallthrough
       }
@@ -557,8 +563,10 @@ const queueSetVolume = (value: number) => {
         await wpctl(`set-volume ${sid} ${v.toFixed(2)}`)
         return
       }
-      // Fallback: system sink volume.
-      await wpctl(`set-volume @DEFAULT_AUDIO_SINK@ ${Math.round(v * 100)}%`)
+      // Fallback: system sink volume only if no stream found AND MPRIS failed/was skipped.
+      if (!mprisSet) {
+        await wpctl(`set-volume @DEFAULT_AUDIO_SINK@ ${Math.round(v * 100)}%`)
+      }
     })()
   })
 }
