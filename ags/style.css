@@ -107,15 +107,14 @@ button.pill.media:hover {
 }
 
 .media-popup {
-  min-width: 560px;
-  /* Higher opacity for readability (no compositor blur). */
-  background-color: rgba(12, 14, 20, 0.92);
-  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
-  color: rgba(235, 238, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  padding: 14px;
-  box-shadow: 0 26px 54px rgba(0, 0, 0, 0.55), inset 0 1px rgba(255, 255, 255, 0.05);
+  min-width: 580px;
+  background-color: rgba(18, 22, 28, 0.65);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  color: rgba(235, 238, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.6), inset 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .media-popup label {
@@ -123,12 +122,12 @@ button.pill.media:hover {
 }
 
 .media-cover {
-  min-width: 180px;
-  min-height: 180px;
-  border-radius: 22px;
+  min-width: 200px;
+  min-height: 200px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
-
 
 .media-cover-fallback {
   color: rgba(235, 238, 255, 0.55);
@@ -138,78 +137,94 @@ button.pill.media:hover {
 
 .media-title {
   font-weight: 700;
-  color: rgba(235, 238, 255, 0.92);
-  font-size: 14px;
+  color: rgba(235, 238, 255, 0.98);
+  font-size: 15px;
+  margin-bottom: 2px;
 }
 
 .media-artist {
-  color: rgba(235, 238, 255, 0.70);
-  font-size: 12px;
+  color: rgba(235, 238, 255, 0.75);
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.media-btn {
+/* Circular Control Buttons */
+.media-circ-btn {
   padding: 0;
-  min-width: 34px;
-  min-height: 34px;
-  background: rgba(20, 22, 30, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  color: rgba(235, 238, 255, 0.90);
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(235, 238, 255, 0.9);
+  transition: all 0.2s;
 }
 
-.media-btn:hover {
-  background: rgba(34, 36, 46, 0.78);
+.media-circ-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #fff;
 }
 
-.media-btn image {
+.media-circ-btn-play {
+  padding: 0;
+  min-width: 58px;
+  min-height: 58px;
+  border-radius: 999px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.media-circ-btn-play:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  transform: scale(1.04);
+}
+
+.media-circ-btn image,
+.media-circ-btn-play image {
   -gtk-icon-shadow: none;
 }
 
-.media-play.is-playing {
-  background: rgba(0, 196, 170, 0.18);
-  border-color: rgba(0, 196, 170, 0.35);
-  color: rgba(170, 255, 245, 0.95);
+/* Duration/Volume Labels */
+.media-sub-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(235, 238, 255, 0.5);
+  letter-spacing: 0.08em;
 }
 
-.media-play.is-playing:hover {
-  background: rgba(0, 196, 170, 0.24);
+.media-wave {
+  color: rgba(235, 238, 255, 0.4);
 }
 
-.media-timeline-controls {
-  margin-right: 6px;
+.media-vol-icon {
+  color: rgba(235, 238, 255, 0.6);
 }
 
-.media-bottom {
-  margin-top: 2px;
-}
-
-.media-volume {
-  opacity: 0.95;
-}
-
-.media-time {
-  color: rgba(235, 238, 255, 0.65);
-}
-
-.media-row {
-  margin-top: 2px;
-}
-
+/* Sliders */
 scale.media-slider trough,
 scale.media-vol trough {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  min-height: 8px;
+  min-height: 4px;
 }
 
 scale.media-slider highlight,
 scale.media-vol highlight {
-  background: rgba(199, 204, 255, 0.55);
+  background: rgba(235, 238, 255, 0.9);
   border-radius: 999px;
+  min-height: 4px;
 }
 
 scale.media-slider slider,
 scale.media-vol slider {
-  background: rgba(235, 238, 255, 0.92);
+  background: #ffffff;
   border-radius: 999px;
+  min-width: 14px;
+  min-height: 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  margin: -5px 0;
 }
