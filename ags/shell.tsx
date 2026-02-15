@@ -113,7 +113,7 @@ const pickPlayer = () => {
   return ps[ps.length - 1] || null
 }
 
-type MediaService = "yandex-music" | "youtube" | "unknown"
+type MediaService = "yandex-music" | "youtube" | "twitch" | "unknown"
 
 type MediaSnapshot = {
   has: boolean
@@ -296,16 +296,20 @@ const resolveService = (p: any, album: string): MediaService => {
   // PWA desktop entries can include the app name.
   if (entry.includes("yandex") && entry.includes("music")) return "yandex-music"
   if (entry.includes("youtube")) return "youtube"
+  if (entry.includes("twitch")) return "twitch"
 
   // Chrome/Chromium PWA: desktop entry is often generic, so detect via metadata.
   const cover = String(p?.cover_art ?? p?.["cover-art"] ?? "").toLowerCase()
   let trackid = ""
+  let url = ""
   try {
     const md = p?.metadata ?? p?.["metadata"]
     if (md && typeof md.deepUnpack === "function") {
       const obj = md.deepUnpack()
       const v = obj?.["mpris:trackid"]
       if (typeof v === "string") trackid = v.toLowerCase()
+      const u = obj?.["xesam:url"]
+      if (typeof u === "string") url = u.toLowerCase()
     }
   } catch {
     // ignore
@@ -320,7 +324,12 @@ const resolveService = (p: any, album: string): MediaService => {
 
   if (!isChromeLike) return "unknown"
 
-  // Chrome heuristic: real music tracks typically have album; YouTube videos typically don't.
+  // Chrome heuristic: try to detect service from URL or specific patterns
+  if (url.includes("twitch.tv") || name.includes("twitch") || cover.includes("twitch")) return "twitch"
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube"
+  if (url.includes("music.yandex.ru")) return "yandex-music"
+
+  // Fallback heuristics
   if (album) return "yandex-music"
   return "youtube"
 }
@@ -682,6 +691,7 @@ function MediaServiceLogo({ size = 16 }: { size?: number }) {
   const filePath = mediaSnap((m) => {
     if (m.service === "youtube") return iconPath("services/youtube.png")
     if (m.service === "yandex-music") return iconPath("services/yandex-music.png")
+    if (m.service === "twitch") return iconPath("services/twitch.png")
     return ""
   })
 
