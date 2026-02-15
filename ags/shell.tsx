@@ -1028,38 +1028,88 @@ function Net() {
   )
 }
 
-function Volume() {
-  const state = createPoll(
-    { vol: 0, muted: false },
-    2000,
-    ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"],
-    (out) => {
+const [volState, setVolState] = createState({ vol: 0, muted: false })
+
+const updateVol = () => {
+  execAsync(["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"])
+    .then((out) => {
       const s = String(out || "").trim()
       const m = s.match(/Volume:\s*([0-9.]+)/)
       const vol = m ? Number(m[1]) : 0
       const muted = /MUTED/i.test(s)
-      return { vol: Number.isFinite(vol) ? vol : 0, muted }
-    },
-  )
+      setVolState({ vol: Number.isFinite(vol) ? vol : 0, muted })
+    })
+    .catch(() => setVolState({ vol: 0, muted: false }))
+}
 
-  const iconName = state((st) => {
-    const p = Math.round((st.vol || 0) * 100)
-    if (st.muted || p === 0) return "audio-volume-muted-symbolic"
-    if (p >= 67) return "audio-volume-high-symbolic"
-    if (p >= 34) return "audio-volume-medium-symbolic"
-    return "audio-volume-low-symbolic"
-  })
+// Initial update and poll
+updateVol()
+interval(2000, updateVol)
+
+function Volume() {
+  const [hovered, setHovered] = createState(false)
 
   return (
-    <button
-      class="pill vol"
-      onClicked={() => sh("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")}
+    <box
+      class={hovered(h => h ? "pill vol hovered" : "pill vol")}
+      $={(self) => {
+        const m = new Gtk.EventControllerMotion()
+        m.connect("enter", () => setHovered(true))
+        m.connect("leave", () => setHovered(false))
+        self.add_controller(m)
+
+        const s = new Gtk.EventControllerScroll({ flags: Gtk.EventControllerScrollFlags.VERTICAL })
+        s.connect("scroll", (_, dx, dy) => {
+           const cmd = dy > 0 ? "5%-" : "5%+"
+           execAsync(`wpctl set-volume @DEFAULT_AUDIO_SINK@ ${cmd}`).then(updateVol)
+           return true
+        })
+        self.add_controller(s)
+      }}
     >
+      <revealer
+        revealChild={hovered()}
+        transitionType={Gtk.RevealerTransitionType.SLIDE_RIGHT}
+        transitionDuration={300}
+      >
+        <box class="vol-slider-box">
+           <slider
+             class="vol-slider"
+             hexpand
+             min={0}
+             max={1}
+             value={volState((s) => (s.muted ? 0 : s.vol))}
+             onChangeValue={({ value }) => {
+               execAsync(`wpctl set-volume @DEFAULT_AUDIO_SINK@ ${Math.round(value * 100)}%`).then(updateVol)
+               if (volState().muted) {
+                 execAsync("wpctl set-mute @DEFAULT_AUDIO_SINK@ 0")
+               }
+             }}
+           />
+        </box>
+      </revealer>
+
       <box spacing={8}>
-        <image iconName={iconName} pixelSize={16} />
-        <label label={state((st) => `${Math.round((st.vol || 0) * 100)}%`)} />
+        <label label={volState((s) => `${Math.round(s.vol * 100)}%`)} />
+        <button
+          class={volState((s) => (s.muted ? "vol-icon muted" : "vol-icon"))}
+          onClicked={() => {
+             execAsync("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle").then(updateVol)
+          }}
+        >
+          <image
+            iconName={volState((s) => {
+              if (s.muted) return "audio-volume-muted-symbolic"
+              const p = Math.round(s.vol * 100)
+              if (p >= 67) return "audio-volume-high-symbolic"
+              if (p >= 34) return "audio-volume-medium-symbolic"
+              return "audio-volume-low-symbolic"
+            })}
+            pixelSize={16}
+          />
+        </button>
       </box>
-    </button>
+    </box>
   )
 }
 
