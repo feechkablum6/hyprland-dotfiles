@@ -34,7 +34,7 @@ export const [mediaTime, setMediaTime] = createState<MediaTime>({ pos: 0, len: 1
 export const [mediaOpen, setMediaOpen] = createState(false)
 export const [mediaCover, setMediaCover] = createState<Gdk.Paintable | null>(null)
 
-let mediaP: any = null
+let mediaP: Mpris.Player | null = null
 let lastLogKey = ""
 let lastTrackKey = ""
 let lastCoverPath = ""
@@ -136,8 +136,8 @@ const resolveAppIconName = (p: any): string => {
   return "multimedia-player-symbolic"
 }
 
-const pickPlayer = () => {
-  const ps = (mpris as any)?.players
+const pickPlayer = (): Mpris.Player | null => {
+  const ps = mpris.players
   if (!Array.isArray(ps) || ps.length === 0) return null
 
   for (let i = ps.length - 1; i >= 0; i--) {

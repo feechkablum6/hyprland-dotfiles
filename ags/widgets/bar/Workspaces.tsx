@@ -5,7 +5,7 @@ import Pill from "../common/Pill"
 export default function Workspaces() {
   const hypr = Hyprland.get_default()
   const focused = createBinding(hypr, "focused-workspace")
-  const focusedId = focused((ws: any) => (ws ? Number(ws.id) : 0))
+  const focusedId = focused((ws: Hyprland.Workspace) => (ws ? Number(ws.id) : 0))
 
   const Dot = (id: number) => (
     <button
