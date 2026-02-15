@@ -161,7 +161,7 @@ let coverPic: Gtk.Picture | null = null
 let lastCoverPath = ""
 
 const EMPTY_COVER = `${GLib.get_home_dir()}/.config/ags/assets/empty-cover.png`
-const COVER_SIZE = 180
+const COVER_SIZE = 200
 
 let lastCoverTexturePath = ""
 let lastCoverTexture: Gdk.Texture | null = null
@@ -364,8 +364,7 @@ const syncMedia = () => {
     if (mediaPosTimer) {
       timeout(0, mediaUpdatePos)
     } else {
-      setMediaPos(0)
-      setMediaLen(1)
+      setMediaTime({ pos: 0, len: 1 })
     }
   }
 
@@ -581,8 +580,7 @@ const toSec = (v: any) => {
 
 const toUs = (sec: number) => Math.round(Math.max(0, Number(sec) || 0) * 1_000_000)
 
-const [mediaPos, setMediaPos] = createState(0) // seconds
-const [mediaLen, setMediaLen] = createState(1) // seconds
+const [mediaTime, setMediaTime] = createState({ pos: 0, len: 1 })
 const [mediaOpen, setMediaOpen] = createState(false)
 
 // Popup positioning: tune this if your bar spacing changes.
@@ -597,8 +595,7 @@ let popupHover = false
 const mediaUpdatePos = () => {
   if (mediaSnap().status === "Stopped") {
     // Keep timeline in a sane default for idle state.
-    setMediaPos(0)
-    setMediaLen(1)
+    setMediaTime({ pos: 0, len: 1 })
     return
   }
   const p = mediaPlayer()
@@ -607,8 +604,10 @@ const mediaUpdatePos = () => {
     mediaStopPolling()
     return
   }
-  setMediaPos(toSec(p.position))
-  setMediaLen(Math.max(1, toSec(p.length)))
+  setMediaTime({
+    pos: toSec(p.position),
+    len: Math.max(1, toSec(p.length))
+  })
 }
 
 const mediaStartPolling = () => {
@@ -787,7 +786,7 @@ function MediaPopup(monitor = 0) {
     >
       <box
         class="media-popup"
-        spacing={14}
+        spacing={20}
         widthRequest={560}
         halign={Gtk.Align.START}
         $={(self) => {
@@ -845,57 +844,38 @@ function MediaPopup(monitor = 0) {
         />
 
         <box orientation={Gtk.Orientation.VERTICAL} hexpand spacing={10}>
-          <box orientation={Gtk.Orientation.VERTICAL} spacing={4}>
-            <label
-              class="media-title"
-              xalign={0}
-              label={mediaSnap((m) => m.title)}
-              ellipsize={Pango.EllipsizeMode.END}
-              maxWidthChars={42}
-            />
-            <label
-              class="media-artist"
-              xalign={0}
-              label={mediaSnap((m) => m.artist)}
-              ellipsize={Pango.EllipsizeMode.END}
-              maxWidthChars={42}
-            />
-          </box>
-
+          {/* Controls - Top */}
           <With value={mediaSnap}>
             {(m) =>
               m.has && (
-                <box orientation={Gtk.Orientation.VERTICAL} spacing={10}>
-                  <box class="media-row media-timeline" spacing={10}>
-                    <label class="media-time" label={mediaPos((v) => fmtTime(v))} />
-                    <slider
-                      class="media-slider"
-                      hexpand
-                      min={0}
-                      max={mediaLen((l) => (l > 0 ? l : 1))}
-                      value={mediaPos((v) => v)}
-                      sensitive={mediaSnap((mm) => !!mm.canSeek)}
-                      onChangeValue={({ value }) => {
-                        const pp = mediaP
-                        if (!pp) return
-                        setMediaPos(Number(value))
-                        mediaSetPosition(pp, Number(value))
-                      }}
+                <box orientation={Gtk.Orientation.VERTICAL} spacing={10} valign={Gtk.Align.CENTER} vexpand>
+
+                  {/* Title and Artist */}
+                  <box orientation={Gtk.Orientation.VERTICAL} spacing={4} halign={Gtk.Align.CENTER}>
+                    <label
+                      class="media-title"
+                      label={m.title}
+                      ellipsize={Pango.EllipsizeMode.END}
+                      maxWidthChars={30}
                     />
-                    <label class="media-time" label={mediaLen((l) => fmtTime(l))} />
+                    <label
+                      class="media-artist"
+                      label={m.artist}
+                      ellipsize={Pango.EllipsizeMode.END}
+                      maxWidthChars={30}
+                    />
                   </box>
 
-                  <box class="media-row media-bottom" spacing={12}>
-                  <box class="media-controls" spacing={8}>
+                  <box class="media-controls" spacing={20} halign={Gtk.Align.CENTER}>
                     <button
-                      class="media-btn media-skip"
+                      class="media-circ-btn"
                       sensitive={mediaSnap((mm) => !!mm.canPrev)}
                       onClicked={() => mediaP?.previous?.()}
                     >
-                      <image iconName="media-skip-backward-symbolic" pixelSize={18} />
+                      <image iconName="media-skip-backward-symbolic" pixelSize={20} />
                     </button>
                     <button
-                      class={mediaSnap((mm) => (mm.status === "Playing" ? "media-btn media-play is-playing" : "media-btn media-play"))}
+                      class={mediaSnap((mm) => (mm.status === "Playing" ? "media-circ-btn-play is-playing" : "media-circ-btn-play"))}
                       sensitive={mediaSnap((mm) => !!mm.canControl)}
                       onClicked={() => mediaPlayPause()}
                     >
@@ -903,19 +883,49 @@ function MediaPopup(monitor = 0) {
                         iconName={mediaSnap((mm) =>
                           mm.status === "Playing" ? "media-playback-pause-symbolic" : "media-playback-start-symbolic",
                         )}
-                        pixelSize={18}
+                        pixelSize={28}
                       />
                     </button>
                     <button
-                      class="media-btn media-skip"
+                      class="media-circ-btn"
                       sensitive={mediaSnap((mm) => !!mm.canNext)}
                       onClicked={() => mediaP?.next?.()}
                     >
-                      <image iconName="media-skip-forward-symbolic" pixelSize={18} />
+                      <image iconName="media-skip-forward-symbolic" pixelSize={20} />
                     </button>
                   </box>
 
-                    <box class="media-volume" spacing={10} hexpand>
+                  {/* Duration */}
+                  <box orientation={Gtk.Orientation.VERTICAL} spacing={6}>
+                    <box spacing={10}>
+                      <label class="media-sub-label" label="DURATION" hexpand xalign={0} />
+                      <image iconName="audio-input-microphone-symbolic" pixelSize={12} class="media-wave" />
+                      <label class="media-sub-label" label={mediaTime((t) => `${fmtTime(t.pos)} / ${fmtTime(t.len)}`)} xalign={1} />
+                    </box>
+                    <slider
+                      class="media-slider"
+                      hexpand
+                      min={0}
+                      max={mediaTime((t) => t.len)}
+                      value={mediaTime((t) => t.pos)}
+                      sensitive={mediaSnap((mm) => !!mm.canSeek)}
+                      onChangeValue={({ value }) => {
+                        const pp = mediaP
+                        if (!pp) return
+                        const newPos = Number(value)
+                        setMediaTime({ ...mediaTime(), pos: newPos })
+                        mediaSetPosition(pp, newPos)
+                      }}
+                    />
+                  </box>
+
+                  {/* Volume */}
+                  <box orientation={Gtk.Orientation.VERTICAL} spacing={6}>
+                    <box spacing={10}>
+                      <label class="media-sub-label" label="VOLUME" hexpand xalign={0} />
+                      <label class="media-sub-label" label={mediaSnap((mm) => `${Math.round((Number.isFinite(mm.volume) ? mm.volume : 0.5) * 100)}%`)} xalign={1} />
+                    </box>
+                    <box spacing={10}>
                       <image class="media-vol-icon" iconName="audio-volume-high-symbolic" pixelSize={16} />
                       <slider
                         class="media-vol"
